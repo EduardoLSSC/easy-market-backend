@@ -1,0 +1,47 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int       @id @default(autoincrement())
+  email     String    @unique
+  password  String
+  role      Role
+  markets   Market[]  @relation("MarketOwner")
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Market {
+  id        Int       @id @default(autoincrement())
+  name      String
+  location  String
+  ownerId   Int
+  owner     User      @relation("MarketOwner", fields: [ownerId], references: [id])
+  products  Product[]
+}
+
+model Product {
+  id        Int       @id @default(autoincrement())
+  name      String
+  barcode   String    @unique
+  price     Float
+  weightKg  Float
+  quantity  Int       @default(0)        // <— novo campo
+  marketId  Int
+  market    Market    @relation(fields: [marketId], references: [id])
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+
+enum Role {
+  user
+  market_owner
+  admin
+}
